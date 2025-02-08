@@ -25,8 +25,22 @@ pub fn merge(ids: &[u16], pair: (u16, u16), idx: u16) -> Vec<u16> {
     new_ids
 }
 
-pub fn encode(text: &str) -> Vec<u16> {
-    let tokens: Vec<u16> = text.as_bytes().iter().map(|&b| b as u16).collect();
+pub fn encode(text: &str, merges: &HashMap<(u16, u16), u16>) -> Vec<u16> {
+    let mut tokens: Vec<u16> = text.as_bytes().iter().map(|&b| b as u16).collect();
+    while tokens.len() >= 2 {
+        let stats = get_stats(&tokens);
+        let pair = stats
+            .iter()
+            .min_by_key(|&(p, _)| merges.get(p).unwrap_or(&u16::MAX))
+            .unwrap().0;
+
+        if !merges.contains_key(&pair) {
+            break;
+        }
+
+        let idx = merges.get(&pair).unwrap();
+        tokens = merge(&tokens, *pair, *idx);
+    }
     tokens
 }
 
@@ -36,7 +50,7 @@ pub fn decode(tokens: &[u16], vocab: &HashMap<u16, Vec<u16>>) -> String {
         if let Some(tokens) = vocab.get(token) {
             text.push_str(&tokens.iter().map(|&t| t as u8 as char).collect::<String>());
         } else {
-            text.push(*token as u8 as char);
+            text.push(* token as u8 as char);
         }
     }
     text

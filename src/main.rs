@@ -8,7 +8,7 @@ const NUM_MERGES: u16 = VOCAB_SIZE - 256;
 
 fn main() {
     let text = "Ｕｎｉｃｏｄｅ! 🅤🅝🅘🅒🅞🅓🅔‽ 🇺‌🇳‌🇮‌🇨‌🇴‌🇩‌🇪! 😄 The very name strikes fear and awe into the hearts of programmers worldwide. We all know we ought to “support Unicode” in our software (whatever that means—like using wchar_t for all the strings, right?). But Unicode can be abstruse, and diving into the thousand-page Unicode Standard plus its dozens of supplementary annexes, reports, and notes can be more than a little intimidating. I don’t blame programmers for still finding the whole thing mysterious, even 30 years after Unicode’s inception.";
-    let tokens: Vec<u16> = tokenizer::encode(text);
+    let tokens: Vec<u16> = text.as_bytes().iter().map(|&b| b as u16).collect();
     
     let mut ids = tokens.clone();
     let mut merges: HashMap<(u16, u16), u16> = HashMap::new();
@@ -50,4 +50,8 @@ fn main() {
 
     println!("Vocab: {:?}", vocab);
     println!("Decoded: {:?}", tokenizer::decode(&ids, &vocab));
+
+    println!("--------------------------------");
+
+    println!("Encode test: {:?}", tokenizer::decode(&tokenizer::encode("hello", &merges), &vocab));
 }
